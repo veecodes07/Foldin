@@ -26,7 +26,7 @@ Fold maintains three layers of compressed state per conversation:
 ## Install
 
 ```bash
-npm install @yourname/fold
+npm install @vedsu/foldin
 ```
 
 ---
