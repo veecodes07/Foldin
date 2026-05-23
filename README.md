@@ -4,13 +4,7 @@
 
 Every token you send to an LLM costs money. Most of it is conversation history the model barely needs. Fold compresses that history into a ~300 token semantic state and injects only what's relevant — so you pay for meaning, not repetition.
 
-No opinions. No SDKs imported. No database forced on you. It does one thing.
-
----
-
-## Why
-In a 30-turn conversation, Fold reduced token usage from **10,242 to 3,000 — a 71% saving.**
-Savings grow the longer the conversation runs.
+No opinions. No SDKs imported. No database forced on you. It does one thing — tested at **71% token reduction over 30 turns**.
 
 ---
 
