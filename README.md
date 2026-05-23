@@ -8,6 +8,12 @@ No opinions. No SDKs imported. No database forced on you. It does one thing.
 
 ---
 
+## Why
+In a 30-turn conversation, Fold reduced token usage from **10,242 to 3,000 — a 71% saving.**
+Savings grow the longer the conversation runs.
+
+---
+
 ## How it works
 
 Fold maintains three layers of compressed state per conversation:
@@ -17,6 +23,9 @@ Fold maintains three layers of compressed state per conversation:
 | State Vector | ~200 tokens | Rolling summary, rewritten every 3 turns |
 | Fact Watchlist | ~50 tokens | Hard facts as `key:value` pairs, never lost |
 | Retrieval Index | 0–200 tokens | Keyword index, only injected when relevant |
+
+In a 30-turn conversation, Fold reduced token usage from **10,242 to 3,000 — a 71% saving.**
+Savings grow the longer the conversation runs.
 
 `pack()` assembles these into a `messages` array you pass straight to your AI API.  
 `update()` records the turn, extracts facts, and rewrites state every 3 turns — all in the background, never blocking your response.
