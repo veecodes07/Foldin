@@ -27,5 +27,8 @@
   "license": "MIT",
   "scripts": {
     "test": "node test.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
