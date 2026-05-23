@@ -1,5 +1,7 @@
 # Foldin
 
+[![npm](https://img.shields.io/npm/v/@vedsu/foldin)](https://www.npmjs.com/package/@vedsu/foldin)
+
 > Zero dependency conversation compression for LLMs. ~150 lines. Bring your own AI and storage.
 
 Every token you send to an LLM costs money. Most of it is conversation history the model barely needs. Foldin compresses that history into a ~300 token semantic state and injects only what's relevant — so you pay for meaning, not repetition.
