@@ -109,6 +109,9 @@ Any object with `get` and `set` works. In-memory, Redis, Postgres, SQLite — yo
 
 ---
 
+<img width="473" height="206" alt="image" src="https://github.com/user-attachments/assets/7f0ef71b-c7b9-485d-aa90-c4cb91a3093b" />
+
+
 ## License
 
 MIT
