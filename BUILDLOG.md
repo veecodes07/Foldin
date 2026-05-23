@@ -78,8 +78,92 @@ npm install @vedsu/foldin
 
 ---
 
+## Session 2 — Prompt tightening & multi-LLM testing
+
+### Fact extraction prompt — 3 iterations
+
+**Problem:** Noisy extractions — `User: 'User'`, `Helper: 'Assistant'`, `answer: 'answer'`, `Ravi: 'Ravi'`.
+
+**Iteration 1 — added Ignore clause:**
+```
+Ignore: speaker labels, filler words, questions without answers, relative time words like "today" or "now".
+```
+Killed `User: 'User'` and `Helper: 'Assistant'`. But conversational phrases still slipped through (`Good: 'point'`, `will: 'ask'`).
+
+**Iteration 2 — added named subject requirement:**
+```
+Each key must be a specific noun or named thing (person, product, feature, metric).
+```
+Reduced filler further. Still saw `User: 'None'` and `Ravi: 'Ravi'` with some models.
+
+**Iteration 3 — XML tags + explicit speaker label + key=value guard:**
+```
+Ignore: speaker labels (User, Assistant, Helper), ... anything where key and value are the same word.
+```
+Wrapped prompt in `<task>` and `<exchange>` XML tags to cleanly separate instruction from data. Universal pattern — works across all LLMs.
+
+**Final prompt:**
+```js
+const FACT_EXTRACTION_PROMPT = (exchange) =>
+  `<task>
+Extract hard facts as key:value pairs under 50 tokens.
+Only: names, numbers, locations, decisions, constraints, preferences.
+Each key must be a specific noun or named thing (person, product, feature, metric).
+Ignore: speaker labels (User, Assistant, Helper), filler words, questions without answers,
+relative time words, anything where key and value are the same word.
+Return only key:value pairs separated by |. If no facts found, return nothing.
+</task>
+<exchange>
+${exchange}
+</exchange>`;
+```
+
+---
+
+### Multi-LLM testing — what we learned
+
+Tested fact extraction across 4 providers/models:
+
+| Model | Result |
+|---|---|
+| Groq — `llama-3.3-70b-versatile` | Clean facts, fast, no daily limits issue in normal use. Best overall. |
+| Gemini | API setup issues, abandoned. |
+| OpenRouter — `nvidia/nemotron-3-super-120b-a12b:free` | Reasoning model — thinks out loud, extracted its own prompt as facts. Wrong model type for this task. |
+| OpenRouter — `openai/gpt-oss-20b:free` | Cleanest facts of all tested. But 200 req/day limit hit mid-test. |
+
+**Key insight:** Fact extraction needs a fast instruction-following model, not a reasoning model. Reasoning models (Nemotron, o-series) think out loud and pollute the output. Groq Llama is the right default.
+
+**Also confirmed:** The `compress` function is truly provider-agnostic — swapping models was always a one-line change. The architecture held perfectly.
+
+---
+
+### Test file restructure
+
+Moved test file to a `test/` subfolder. Updated import from `'./index.js'` to `'../index.js'`. Run from project root: `node test/test.real.js`.
+
+---
+
+### Extended real-world test — 71 turns
+
+Re-ran the test with a longer 71-turn simulated conversation (startup founder building a SaaS product over 7 days).
+
+```
+Total tokens WITH Foldin:    ~7,100
+Total tokens WITHOUT Foldin: ~49,203
+Tokens saved:                ~42,103
+Savings:                     86%
+```
+
+**Observation:** Savings grow as conversation length increases. At 30 turns: 71%. At 71 turns: 86%. The longer the conversation, the more Foldin pays off.
+
+**State vector quality was good** — correctly retained decisions (REST API, Mumbai pilot, ravishop.in domain, 3-month launch, Priya as design co-founder) across all 71 turns.
+
+**Facts extracted correctly:** `name`, `location`, `budget`, `Co-founder`, `Stack`, `domain`, `barcode scanning feature`, `MRR`, `paying customers`, `price`, `signups`.
+
+---
+
 ## What's next
-- Tighten fact extraction prompt — filter out noise
-- Test inside a real chatbot project
-- Get real token savings data from a production conversation
-- Publish v0.2.0 with prompt improvements
+- Publish v0.2.0 with tightened fact extraction prompt
+- Build the hosted API endpoint (Vercel + Supabase + auth)
+- Landing page with before/after token graph
+- Test with Claude and GPT-4o as the compress model for quality comparison
