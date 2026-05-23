@@ -1,4 +1,4 @@
-# Fold
+# Foldin
 
 > Zero dependency conversation compression for LLMs. ~150 lines. Bring your own AI and storage.
 
