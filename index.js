@@ -21,11 +21,16 @@ Be dense. Drop nothing important. Add nothing unnecessary.
 Return only the rewritten state, no explanation.`;
 
 const FACT_EXTRACTION_PROMPT = (exchange) =>
-  `Extract hard facts from this exchange as key:value pairs under 50 tokens.
-Only facts: names, numbers, locations, decisions, constraints.
-Exchange: ${exchange}
-Return only key:value pairs separated by |. Nothing else.`;
-
+  `<task>
+Extract hard facts as key:value pairs under 50 tokens.
+Only: names, numbers, locations, decisions, constraints, preferences.
+Each key must be a specific noun or named thing (person, product, feature, metric).
+Ignore: speaker labels (User, Assistant, Helper), filler words, questions without answers, relative time words, anything where key and value are the same word.
+Return only key:value pairs separated by |. If no facts found, return nothing.
+</task>
+<exchange>
+${exchange}
+</exchange>`;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**

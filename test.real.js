@@ -1,5 +1,5 @@
+import 'dotenv/config';  // 👈 must be first
 import createFold from './index.js';
-import 'dotenv/config';
 
 // ─── Groq compress function ───────────────────────────────────────────────────
 const compress = async (prompt) => {
@@ -20,6 +20,37 @@ const compress = async (prompt) => {
   return data.choices[0].message.content;
 };
 
+//openrouter
+// const compress = async (prompt) => {
+//   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+//     method: "POST",
+//     headers: {
+//       "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+//       "Content-Type": "application/json"
+//     },
+//     body: JSON.stringify({
+//       model: "openai/gpt-oss-20b:free",
+//       messages: [{ role: "user", content: prompt }],
+//       max_tokens: 300
+//     })
+//   });
+//   const data = await res.json();
+//   if (data.error) throw new Error(data.error.message);
+//   return data.choices[0].message.content;
+// };
+//gemini
+// const compress = async (prompt) => {
+//   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({
+//       contents: [{ parts: [{ text: prompt }] }]
+//     })
+//   });
+//   const data = await res.json();
+//   if (data.error) throw new Error(data.error.message);
+//   return data.candidates[0].content.parts[0].text;
+// };
 
 // ─── In-memory storage ────────────────────────────────────────────────────────
 const db = new Map();

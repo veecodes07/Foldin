@@ -19,7 +19,9 @@
     "gemini"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18"
