@@ -12,7 +12,7 @@ No opinions. No SDKs imported. No database forced on you. It does one thing.
 
 ## Why
 
-In a 30-turn conversation, Foldin reduced token usage from **10,242 to 3,000 — a 71% saving.**
+In a 30-turn conversation, Foldin reduced token usage from **492032 to 7100 — an 86% saving.**
 Savings grow the longer the conversation runs.
 
 ---
