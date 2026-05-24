@@ -31,10 +31,12 @@ Return only key:value pairs separated by |. If no facts found, return nothing.
 <exchange>
 ${exchange}
 </exchange>`;
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
  * Parses raw fact string "k:v|k:v" into a plain object.
+ * Handles values that contain colons (e.g. time:10:30am).
  * @param {string} raw
  * @returns {Record<string, string>}
  */
@@ -43,7 +45,11 @@ function parseFacts(raw) {
   return Object.fromEntries(
     raw
       .split("|")
-      .map((pair) => pair.split(":").map((s) => s.trim()))
+      .map((pair) => {
+        const i = pair.indexOf(":");
+        if (i === -1) return [];
+        return [pair.slice(0, i).trim(), pair.slice(i + 1).trim()];
+      })
       .filter(([k, v]) => k && v)
   );
 }
@@ -69,25 +75,12 @@ function serialiseFacts(facts) {
     .join("|");
 }
 
-/**
- * Checks whether a keyword from the retrieval index appears in the new message.
- * @param {string[]} keywords
- * @param {string} message
- * @returns {boolean}
- */
-function isRetrievalRelevant(keywords, message) {
-  if (!keywords || keywords.length === 0) return false;
-  const lower = message.toLowerCase();
-  return keywords.some((kw) => lower.includes(kw.toLowerCase()));
-}
-
 // ─── Default empty state ──────────────────────────────────────────────────────
 
 function emptyState() {
   return {
     stateVector: "",
     factWatchlist: {},
-    chunkIndex: [],
     turnCount: 0,
   };
 }
@@ -119,7 +112,7 @@ function validateOptions(storage, compress) {
  * @param {object} options
  * @param {{ get: (id: string) => Promise<FoldState>, set: (id: string, state: FoldState) => Promise<void> }} options.storage
  * @param {(prompt: string) => Promise<string>} options.compress - Your AI caller. Any provider. No SDK imported here.
- * @returns {{ pack: Function, update: Function }}
+ * @returns {{ pack: Function, update: Function, reset: Function }}
  *
  * @example
  * const fold = createFold({
@@ -131,7 +124,6 @@ function createFold({ storage, compress }) {
   validateOptions(storage, compress);
 
   // Per-conversation queue — serialises updates so turn counts never race.
-  // Each conversation processes one update at a time, in arrival order.
   /** @type {Map<string, Promise<void>>} */
   const queues = new Map();
 
@@ -146,7 +138,6 @@ function createFold({ storage, compress }) {
       console.error("[Fold] background update failed:", err);
     });
     queues.set(id, next);
-    // Clean up resolved chains to avoid memory leak on long-running processes
     next.then(() => {
       if (queues.get(id) === next) queues.delete(id);
     });
@@ -164,7 +155,7 @@ function createFold({ storage, compress }) {
     const raw = await storage.get(conversationId);
     const state = raw ?? emptyState();
 
-    const { stateVector, factWatchlist, chunkIndex } = state;
+    const { stateVector, factWatchlist } = state;
 
     const contextParts = [];
 
@@ -177,11 +168,6 @@ function createFold({ storage, compress }) {
     const factsStr = serialiseFacts(factWatchlist ?? {});
     if (factsStr) {
       contextParts.push(`[Facts]\n${factsStr}`);
-    }
-
-    // Layer 3 — Retrieval Index (0-200 tokens), only injected when relevant
-    if (isRetrievalRelevant(chunkIndex, newMessage)) {
-      contextParts.push(`[Index]\n${chunkIndex.join(", ")}`);
     }
 
     const systemContent = contextParts.join("\n\n");
@@ -200,7 +186,6 @@ function createFold({ storage, compress }) {
 
   /**
    * Records a completed turn. Extracts facts and rewrites state every 3 turns.
-   * Enqueued per conversation — updates are serialised so turn counts are always correct.
    * Returns immediately; background work runs in the queue without blocking the caller.
    *
    * @param {string} conversationId
@@ -237,7 +222,18 @@ function createFold({ storage, compress }) {
     });
   }
 
-  return { pack, update };
+  /**
+   * Clears all compressed state for a conversation.
+   * Call this when starting a fresh conversation with the same ID.
+   *
+   * @param {string} conversationId
+   * @returns {Promise<void>}
+   */
+  async function reset(conversationId) {
+    await storage.set(conversationId, emptyState());
+  }
+
+  return { pack, update, reset };
 }
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
@@ -249,6 +245,5 @@ export default createFold;
  * @typedef {object} FoldState
  * @property {string} stateVector - Rolling summary (~200 tokens)
  * @property {Record<string, string>} factWatchlist - Hard facts as key:value pairs (~50 tokens)
- * @property {string[]} chunkIndex - Sparse keyword index (0-200 tokens)
  * @property {number} turnCount - Total turns recorded
  */
