@@ -12,20 +12,23 @@ No opinions. No SDKs imported. No database forced on you. It does one thing.
 
 ## Why
 
-In a 70-turn conversation, Foldin reduced token usage from **49203 to 7100 — an 86% saving.**
-Savings grow the longer the conversation runs.
+Savings grow the longer the conversation runs:
+
+| Conversation length | Tokens without Foldin | Tokens with Foldin | Saved |
+|---|---|---|---|
+| 30 turns | ~10,242 | ~3,000 | **71%** |
+| 71 turns | ~49,203 | ~7,100 | **86%** |
 
 ---
 
 ## How it works
 
-Foldin maintains three layers of compressed state per conversation:
+Foldin maintains two active layers of compressed state per conversation:
 
 | Layer | Size | What it is |
 |---|---|---|
 | State Vector | ~200 tokens | Rolling summary, rewritten every 3 turns |
 | Fact Watchlist | ~50 tokens | Hard facts as `key:value` pairs, never lost |
-| Retrieval Index | 0–200 tokens | Keyword index, only injected when relevant |
 
 `pack()` assembles these into a `messages` array you pass straight to your AI API.  
 `update()` records the turn, extracts facts, and rewrites state every 3 turns — all in the background, never blocking your response.
@@ -91,10 +94,12 @@ Any object with `get` and `set` works. In-memory, Redis, Postgres, SQLite — yo
 ```js
 // Minimal interface
 {
-  get: async (conversationId) => ({ stateVector, factWatchlist, chunkIndex, turnCount }),
+  get: async (conversationId) => ({ stateVector, factWatchlist, turnCount }),
   set: async (conversationId, state) => void
 }
 ```
+
+<img width="473" height="206" alt="Screenshot 2026-05-23 151716" src="https://github.com/user-attachments/assets/0dc710ae-3007-490d-81ae-5a9a18d6f034" />
 
 ---
 
@@ -108,9 +113,6 @@ Any object with `get` and `set` works. In-memory, Redis, Postgres, SQLite — yo
 - **Non-blocking.** Background compression never delays your response.
 
 ---
-
-<img width="473" height="206" alt="image" src="https://github.com/user-attachments/assets/7f0ef71b-c7b9-485d-aa90-c4cb91a3093b" />
-
 
 ## License
 
