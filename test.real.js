@@ -2,22 +2,48 @@ import 'dotenv/config';  // 👈 must be first
 import createFold from './index.js';
 
 // ─── Groq compress function ───────────────────────────────────────────────────
+// const compress = async (prompt) => {
+//   const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+//     method: "POST",
+//     headers: {
+//       "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+//       "Content-Type": "application/json"
+//     },
+//     body: JSON.stringify({
+//       model: "llama-3.3-70b-versatile",
+//       messages: [{ role: "user", content: prompt }],
+//       max_tokens: 300
+//     })
+//   });
+//   const data = await res.json();
+//   if (data.error) throw new Error(data.error.message);
+//   return data.choices[0].message.content;
+// };
 const compress = async (prompt) => {
-  const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
+  const res = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 300
+      model: "llama3.2:1b",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      stream: false
     })
   });
+
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.choices[0].message.content;
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  return data.message.content;
 };
 
 //openrouter
@@ -166,10 +192,10 @@ for (let i = 0; i < conversation.length; i++) {
   console.log(`  Context size: ${tokensBefore} chars`);
   console.log(`  Messages in context: ${messages.length}`);
 
-  fold.update(id, userMsg, aiReply);
+  await fold.update(id, userMsg, aiReply);
 
   // Wait for background work to finish
-  await new Promise((r) => setTimeout(r, 3000)); // 3 seconds between turns
+  await new Promise((r) => setTimeout(r, 3000));
 }
 
 // Final state
