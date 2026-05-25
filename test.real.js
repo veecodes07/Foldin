@@ -26,7 +26,7 @@ const compress = async (prompt) => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "llama3.2:1b",
+      model: "llama3.2:3b",
       messages: [
         {
           role: "user",
