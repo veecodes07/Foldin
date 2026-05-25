@@ -162,8 +162,48 @@ Savings:                     86%
 
 ---
 
+## Session 3 — Post-publish traction
+
+### npm downloads
+
+Zero promotion on launch. Package published, README written, nothing shared publicly.
+
+Within days:
+
+```
+Weekly downloads: 1,005
+Peak single day:  ~850 downloads (May 23)
+```
+
+Bell curve spike shape — sharp rise then gradual drop over 2 days. Not a bot pattern. Bots produce flat baselines, not spikes.
+
+---
+
+### GitHub traffic — May 23
+
+```
+Clones:          190
+Unique cloners:  103
+```
+
+**103 unique cloners in a single day with zero promotion.** These are real developers who ran `git clone` — not web crawlers, not scanners.
+
+Referring sites showed only `github.com` with 1 unique visitor. No web referrer means traffic came from a direct/private share — Discord, Telegram, WhatsApp, or a private Slack. Someone shared the npm link in a private group and it spread from there.
+
+**Conclusion:** Organic discovery. The package solved a real problem people were already searching for.
+
+---
+
+### Key observation
+
+The traction happened before any of the "What's next" items were built — no hosted API, no landing page, no promotion. The README and the idea were enough.
+
+---
+
 ## What's next
 - Publish v0.2.0 with tightened fact extraction prompt
 - Build the hosted API endpoint (Vercel + Supabase + auth)
 - Landing page with before/after token graph
 - Test with Claude and GPT-4o as the compress model for quality comparison
+- Adaptive compression budget — simple conversations compress to ~100 tokens, complex ones get ~400
+- Fact confidence scoring — high-importance facts flagged so they are never dropped during rewrite
