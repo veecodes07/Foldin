@@ -21,6 +21,14 @@ Savings grow the longer the conversation runs:
 
 ---
 
+> Real-world result from [ChitChat](https://github.com/veecodes07/chitchat), 
+> a demo app built with Foldin + Ollama 3.2:3b :
+
+<img width="982" height="923" alt="image" src="https://github.com/user-attachments/assets/9592bafe-8b84-441a-b1a7-c00e95342748" />
+
+
+**85% saved after just 3 turns** — 454 tokens sent vs 3,111 without Foldin.
+
 ## How it works
 
 Foldin maintains two active layers of compressed state per conversation:
