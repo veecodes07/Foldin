@@ -21,7 +21,7 @@ Savings grow the longer the conversation runs:
 
 ---
 
-> Real-world result from [ChitChat](https://github.com/veecodes07/chitchat), 
+> Real-world result from [ChitChat](https://github.com/veecodes07/chitchat-compression), 
 > a demo app built with Foldin + Ollama 3.2:3b :
 
 <img width="982" height="923" alt="image" src="https://github.com/user-attachments/assets/9592bafe-8b84-441a-b1a7-c00e95342748" />
