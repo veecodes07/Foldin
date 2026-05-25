@@ -1,6 +1,6 @@
 {
   "name": "@vedsu/foldin",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Compresses AI conversation history into ~300 tokens. Zero dependencies. Bring your own storage and AI.",
   "type": "module",
   "main": "index.js",
