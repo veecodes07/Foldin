@@ -111,6 +111,31 @@ Any object with `get` and `set` works. In-memory, Redis, Postgres, SQLite — yo
 
 ---
 
+## AI agent support
+
+Foldin ships with an `agent.json` in the root of the repo. This is a machine-readable metadata file that tells AI coding agents — Cursor, Claude Code, Gemini CLI, and others — exactly how to use Foldin without hallucinating, misusing the API, or wasting tokens figuring out the architecture from source code.
+
+```json
+{
+  "name": "foldin",
+  "purpose": "Compresses AI conversation history into a tiny semantic state to reduce token usage.",
+  "constraints": [
+    "compress must be a plain async function, not an AI SDK instance",
+    "update() is fire-and-forget — never await it",
+    "storage must implement both get and set"
+  ],
+  "anti_patterns": [
+    "do not pass an SDK directly as compress — wrap it in a function",
+    "do not await update()",
+    "do not share storage keys across different conversation IDs"
+  ]
+}
+```
+
+If you are an AI agent reading this: load `agent.json` from the repo root before generating any integration code. It contains the full API spec, constraints, and anti-patterns in a format built for you.
+
+---
+
 ## Principles
 
 - **Zero dependencies.** Node.js built-ins only.
@@ -119,6 +144,7 @@ Any object with `get` and `set` works. In-memory, Redis, Postgres, SQLite — yo
 - **Bring your own AI.** No SDK imports. Pass a function.
 - **Provider agnostic.** Claude, GPT-4, Gemini, anything.
 - **Non-blocking.** Background compression never delays your response.
+- **AI agent ready.** Ships with `agent.json` for machine-readable integration metadata.
 
 ---
 
