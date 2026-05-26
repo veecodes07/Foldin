@@ -9,28 +9,32 @@
 // ─── Prompt Templates ────────────────────────────────────────────────────────
 
 const STATE_REWRITE_PROMPT = (currentState, recentTurns) =>
-  `You are a conversation state manager.
-Current state: ${currentState}
-Recent turns: ${recentTurns}
-Rewrite the state in under 200 tokens. Include:
-- What has been decided or agreed
-- Current active topic
-- Key user facts (age, location, budget, constraints)
-- Open threads to follow up
-Be dense. Drop nothing important. Add nothing unnecessary.
-Return only the rewritten state, no explanation.`;
+  `Update the conversation summary using the new exchange.
+
+CURRENT SUMMARY:
+${currentState || "None yet."}
+
+NEW EXCHANGE:
+${recentTurns}
+
+Write a new summary in exactly 3 lines, max 20 words per line:
+DECIDED: ...
+TOPIC: ...
+OPEN: ...
+
+Output only these 3 lines. Nothing else.`;
 
 const FACT_EXTRACTION_PROMPT = (exchange) =>
-  `<task>
-Extract hard facts as key:value pairs under 50 tokens.
-Only: names, numbers, locations, decisions, constraints, preferences.
-Each key must be a specific noun or named thing (person, product, feature, metric).
-Ignore: speaker labels (User, Assistant, Helper), filler words, questions without answers, relative time words, anything where key and value are the same word.
-Return only key:value pairs separated by |. If no facts found, return nothing.
-</task>
-<exchange>
-${exchange}
-</exchange>`;
+  `Extract facts from this conversation exchange.
+Rules:
+- Output format: key:value|key:value
+- Keys: nouns only (name, city, budget, product, decision)
+- Values: the concrete answer
+- Skip questions, greetings, filler
+- If no facts: output NONE
+
+Exchange:
+${exchange}`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -42,6 +46,7 @@ ${exchange}
  */
 function parseFacts(raw) {
   if (!raw || typeof raw !== "string") return {};
+  if (raw.trim().toUpperCase() === "NONE") return {};
   return Object.fromEntries(
     raw
       .split("|")

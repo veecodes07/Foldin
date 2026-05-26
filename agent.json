@@ -1,0 +1,67 @@
+{
+  "name": "foldin",
+  "version": "0.2.0",
+  "purpose": "Compresses AI conversation history into a tiny semantic state (~300 tokens) to reduce token usage across long conversations.",
+  "architecture": {
+    "entry": "index.js",
+    "pattern": "bring-your-own-storage-and-ai",
+    "zero_dependencies": true,
+    "state_layers": {
+      "stateVector": "Rolling prose summary of the conversation, rewritten every 3 turns",
+      "factWatchlist": "Hard facts extracted each turn as key:value pairs",
+      "turnCount": "Total turns recorded, used to trigger state rewrites"
+    }
+  },
+  "api": {
+    "createFold": {
+      "description": "Creates a Fold instance. Call once per app, not once per conversation.",
+      "params": {
+        "storage": "{ get: async (id: string) => FoldState | null, set: async (id: string, state: FoldState) => void }",
+        "compress": "async (prompt: string) => string — your AI caller, any provider, any model"
+      },
+      "returns": "{ pack, update, reset }"
+    },
+    "pack": {
+      "description": "Call before every AI request. Returns messages array ready to pass directly to your AI API.",
+      "params": {
+        "conversationId": "string — unique ID per conversation",
+        "newMessage": "string — the user's latest message"
+      },
+      "returns": "{ messages: Array<{ role: string, content: string }> }"
+    },
+    "update": {
+      "description": "Call after every AI response. Fire-and-forget — do not await. Runs background compression asynchronously.",
+      "params": {
+        "conversationId": "string",
+        "userMessage": "string",
+        "aiResponse": "string"
+      },
+      "returns": "void"
+    },
+    "reset": {
+      "description": "Clears all compressed state for a conversation. Call when starting a fresh conversation on the same ID.",
+      "params": {
+        "conversationId": "string"
+      },
+      "returns": "Promise<void>"
+    }
+  },
+  "constraints": [
+    "compress must be a plain async function, not an AI SDK instance",
+    "storage must implement both get and set",
+    "update() is fire-and-forget — never await it",
+    "compress is called once per turn for fact extraction, and a second time every 3 turns for state rewrite",
+    "state rewrites trigger at turnCount % 3 === 0"
+  ],
+  "anti_patterns": [
+    "do not pass an SDK directly as compress — wrap it in a function",
+    "do not await update()",
+    "do not share storage keys across different conversation IDs",
+    "do not call reset() mid-conversation unless intentionally wiping state"
+  ],
+  "performance": {
+    "token_savings": "~78% reduction vs raw history on realistic conversations",
+    "savings_start": "turn 1 — compression is active from the first turn",
+    "context_size": "stays flat as conversation grows, raw history grows linearly"
+  }
+}
